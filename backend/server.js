@@ -20,6 +20,10 @@ mongoose.connect(process.env.MONGO_URI, {
 // Rutas
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
+// Importar rutas de deportes
+const deporteRoutes = require("./routes/deporteRoutes");
+app.use("/api/deportes", deporteRoutes);
+
 
 // Configuración del servidor
 const PORT = process.env.PORT || 5000;
