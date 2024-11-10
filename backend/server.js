@@ -23,7 +23,8 @@ app.use("/api/auth", authRoutes);
 // Importar rutas de deportes
 const deporteRoutes = require("./routes/deporteRoutes");
 app.use("/api/deportes", deporteRoutes);
-
+const atletaRoutes = require("./routes/atletaRoutes");
+app.use("/api/atletas", atletaRoutes);
 
 // Configuración del servidor
 const PORT = process.env.PORT || 5000;
