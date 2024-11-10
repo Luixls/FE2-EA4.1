@@ -9,9 +9,11 @@ function Header({ toggleModoNocturno, modoNocturno }) {
   const [mensaje, setMensaje] = useState("");
 
   const isAuthenticated = !!localStorage.getItem("token");
+  const userRole = localStorage.getItem("rol"); // Obtenemos el rol del usuario
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("rol");
     setMensaje("Sesión cerrada correctamente.");
     setTimeout(() => {
       setMensaje("");
@@ -54,6 +56,11 @@ function Header({ toggleModoNocturno, modoNocturno }) {
               <Link to="/deportes" className="hover:underline" onClick={closeMenu}>Deportes</Link>
               <Link to="/atletas" className="hover:underline" onClick={closeMenu}>Atletas</Link>
               <Link to="/competencias" className="hover:underline" onClick={closeMenu}>Competencias</Link>
+
+              {/* Solo mostrar "Sección Administrativa" si el usuario tiene rol admin o mod */}
+              {(userRole === "admin" || userRole === "mod") && (
+                <Link to="/seccion-administrativa" className="hover:underline" onClick={closeMenu}>Sección Administrativa</Link>
+              )}
 
               {isAuthenticated ? (
                 <button

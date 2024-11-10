@@ -6,11 +6,12 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import PaginaAnimada from "./components/PaginaAnimada";
 import Inicio from "./pages/Inicio";
-import Registro from "./pages/Registro";
-import Login from "./pages/Login";
 import Deportes from "./pages/Deportes";
 import Atletas from "./pages/Atletas";
 import Competencias from "./pages/Competencias";
+import SeccionAdministrativa from "./pages/SeccionAdministrativa";
+import Registro from "./pages/Registro";
+import Login from "./pages/Login";
 
 function App() {
   const [modoNocturno, setModoNocturno] = useState(false);
@@ -34,6 +35,7 @@ function App() {
             <Route path="/deportes" element={<PaginaAnimada><Deportes /></PaginaAnimada>} />
             <Route path="/atletas" element={<PaginaAnimada><Atletas /></PaginaAnimada>} />
             <Route path="/competencias" element={<PaginaAnimada><Competencias /></PaginaAnimada>} />
+            <Route path="/seccion-administrativa" element={<PaginaAnimada><SeccionAdministrativa /></PaginaAnimada>} />
             <Route path="/registro" element={<PaginaAnimada><Registro /></PaginaAnimada>} />
             <Route path="/login" element={<PaginaAnimada><Login /></PaginaAnimada>} />
           </Routes>
