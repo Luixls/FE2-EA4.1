@@ -4,13 +4,12 @@ import axios from "axios";
 
 function Deportes() {
   const [deportes, setDeportes] = useState([]);
-  const [nuevoDeporte, setNuevoDeporte] = useState({ nombre: "", descripcion: "" });
+  const [nuevoDeporte, setNuevoDeporte] = useState({ nombre: "", descripcion: "", imagen: "" });
   const [editing, setEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Obtener el token y rol de usuario desde el almacenamiento local
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("rol");
 
@@ -70,7 +69,7 @@ function Deportes() {
   };
 
   const handleEdit = (deporte) => {
-    setNuevoDeporte({ nombre: deporte.nombre, descripcion: deporte.descripcion });
+    setNuevoDeporte({ nombre: deporte.nombre, descripcion: deporte.descripcion, imagen: deporte.imagen });
     setEditing(true);
     setEditId(deporte._id);
   };
@@ -99,7 +98,7 @@ function Deportes() {
   };
 
   const resetForm = () => {
-    setNuevoDeporte({ nombre: "", descripcion: "" });
+    setNuevoDeporte({ nombre: "", descripcion: "", imagen: "" });
     setEditing(false);
     setEditId(null);
   };
@@ -127,39 +126,51 @@ function Deportes() {
             className="border p-2 mb-2 w-full"
             required
           />
+          <input
+            type="text"
+            name="imagen"
+            placeholder="URL de la Imagen"
+            value={nuevoDeporte.imagen}
+            onChange={handleInputChange}
+            className="border p-2 mb-2 w-full"
+          />
           <button type="submit" className="bg-blue-500 text-white p-2 rounded">
             {editing ? "Actualizar Deporte" : "Crear Deporte"}
           </button>
         </form>
       )}
 
-      <ul className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {deportes.map((deporte) => (
-          <li key={deporte._id} className="bg-white p-4 rounded shadow">
-            <h3 className="text-xl font-semibold">{deporte.nombre}</h3>
-            <p>{deporte.descripcion}</p>
-
-            <div className="mt-2">
-              {(isAdmin || isMod) && (
-                <button
-                  onClick={() => handleEdit(deporte)}
-                  className="bg-yellow-500 text-white p-2 rounded mr-2"
-                >
-                  Editar
-                </button>
-              )}
-              {isAdmin && (
-                <button
-                  onClick={() => confirmDelete(deporte._id)}
-                  className="bg-red-500 text-white p-2 rounded"
-                >
-                  Eliminar
-                </button>
-              )}
+          <div key={deporte._id} className="max-w-sm mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+            {deporte.imagen && (
+              <img src={deporte.imagen} alt={deporte.nombre} className="w-full h-40 object-cover" />
+            )}
+            <div className="p-4">
+              <h3 className="text-2xl font-semibold mb-2">{deporte.nombre}</h3>
+              <p className="text-gray-700 mb-4">{deporte.descripcion}</p>
+              <div className="flex space-x-2">
+                {(isAdmin || isMod) && (
+                  <button
+                    onClick={() => handleEdit(deporte)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                  >
+                    Editar
+                  </button>
+                )}
+                {isAdmin && (
+                  <button
+                    onClick={() => confirmDelete(deporte._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {/* Modal de Confirmación de Eliminación */}
       {showConfirmDelete && (

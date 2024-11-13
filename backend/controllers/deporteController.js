@@ -13,10 +13,10 @@ exports.obtenerDeportes = async (req, res) => {
 
 // Agregar un nuevo deporte
 exports.agregarDeporte = async (req, res) => {
-  const { nombre, descripcion } = req.body;
+  const { nombre, descripcion, imagen } = req.body; // Incluye 'imagen'
 
   try {
-    const nuevoDeporte = new Deporte({ nombre, descripcion });
+    const nuevoDeporte = new Deporte({ nombre, descripcion, imagen });
     await nuevoDeporte.save();
     res.status(201).json(nuevoDeporte);
   } catch (error) {
@@ -27,12 +27,12 @@ exports.agregarDeporte = async (req, res) => {
 // Editar un deporte
 exports.editarDeporte = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion } = req.body;
+  const { nombre, descripcion, imagen } = req.body; // Incluye 'imagen'
 
   try {
     const deporteActualizado = await Deporte.findByIdAndUpdate(
       id,
-      { nombre, descripcion },
+      { nombre, descripcion, imagen },
       { new: true }
     );
     res.json(deporteActualizado);
