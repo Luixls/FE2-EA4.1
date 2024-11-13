@@ -361,11 +361,16 @@ function Competencias() {
       <ul className="space-y-4">
         {filteredCompetencias.map((competencia) => (
           <li key={competencia._id} className="bg-white p-4 rounded shadow-md">
-            {/* Actualización: Deporte y categoría en el mismo encabezado */}
             <h3 className="text-xl font-semibold">
               {competencia.deporte.nombre} - {competencia.categoria}
             </h3>
             <p>Año: {competencia.anio}</p>
+            <h4 className="font-semibold">Primeros Lugares:</h4>
+            <ul className="pl-4 list-disc">
+              <li>🥇 {competencia.primerLugar?.nombre || "No definido"}</li>
+              <li>🥈 {competencia.segundoLugar?.nombre || "No definido"}</li>
+              <li>🥉 {competencia.tercerLugar?.nombre || "No definido"}</li>
+            </ul>
             <h4 className="font-semibold">Participantes:</h4>
             <ul className="list-disc pl-5">
               {competencia.participantes.map((p, index) => (
