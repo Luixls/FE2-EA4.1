@@ -11,8 +11,18 @@ exports.obtenerAtletas = async (req, res) => {
 };
 
 exports.agregarAtleta = async (req, res) => {
-  const { nombre, fechaNacimiento, nacionalidad, genero } = req.body;
-  const nuevoAtleta = new Atleta({ nombre, fechaNacimiento, nacionalidad, genero });
+  let { nombre, fechaNacimiento, nacionalidad, genero } = req.body;
+  fechaNacimiento = new Date(fechaNacimiento);
+  fechaNacimiento.setMinutes(
+    fechaNacimiento.getMinutes() + fechaNacimiento.getTimezoneOffset()
+  ); // Ajuste de zona horaria
+
+  const nuevoAtleta = new Atleta({
+    nombre,
+    fechaNacimiento,
+    nacionalidad,
+    genero,
+  });
   try {
     await nuevoAtleta.save();
     res.status(201).json(nuevoAtleta);
@@ -23,9 +33,17 @@ exports.agregarAtleta = async (req, res) => {
 
 exports.editarAtleta = async (req, res) => {
   const { id } = req.params;
-  const { nombre, fechaNacimiento, nacionalidad, genero } = req.body;
+  let { nombre, fechaNacimiento, nacionalidad, genero } = req.body;
+  fechaNacimiento = new Date(fechaNacimiento);
+  fechaNacimiento.setMinutes(
+    fechaNacimiento.getMinutes() + fechaNacimiento.getTimezoneOffset()
+  ); // Ajuste de zona horaria
   try {
-    const atleta = await Atleta.findByIdAndUpdate(id, { nombre, fechaNacimiento, nacionalidad, genero }, { new: true });
+    const atleta = await Atleta.findByIdAndUpdate(
+      id,
+      { nombre, fechaNacimiento, nacionalidad, genero },
+      { new: true }
+    );
     res.json(atleta);
   } catch (error) {
     res.status(500).json({ message: "Error al actualizar atleta" });
