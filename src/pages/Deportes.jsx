@@ -4,10 +4,15 @@ import axios from "axios";
 
 function Deportes() {
   const [deportes, setDeportes] = useState([]);
-  const [nuevoDeporte, setNuevoDeporte] = useState({ nombre: "", descripcion: "", imagen: "" });
+  const [nuevoDeporte, setNuevoDeporte] = useState({
+    nombre: "",
+    descripcion: "",
+    imagen: "",
+  });
   const [editing, setEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showFormPopup, setShowFormPopup] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -50,7 +55,7 @@ function Deportes() {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchDeportes();
-      resetForm();
+      closeFormPopup();
     } catch (error) {
       console.error("Error al crear deporte:", error);
     }
@@ -58,20 +63,29 @@ function Deportes() {
 
   const updateDeporte = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/deportes/${editId}`, nuevoDeporte, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(
+        `http://localhost:5000/api/deportes/${editId}`,
+        nuevoDeporte,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       fetchDeportes();
-      resetForm();
+      closeFormPopup();
     } catch (error) {
       console.error("Error al actualizar deporte:", error);
     }
   };
 
   const handleEdit = (deporte) => {
-    setNuevoDeporte({ nombre: deporte.nombre, descripcion: deporte.descripcion, imagen: deporte.imagen });
+    setNuevoDeporte({
+      nombre: deporte.nombre,
+      descripcion: deporte.descripcion,
+      imagen: deporte.imagen,
+    });
     setEditing(true);
     setEditId(deporte._id);
+    setShowFormPopup(true);
   };
 
   const handleDelete = async () => {
@@ -103,48 +117,36 @@ function Deportes() {
     setEditId(null);
   };
 
+  const closeFormPopup = () => {
+    resetForm();
+    setShowFormPopup(false);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-3xl font-bold mb-4">Gestión de Deportes</h2>
 
       {isAdmin && (
-        <form onSubmit={handleSubmit} className="mb-4">
-          <input
-            type="text"
-            name="nombre"
-            placeholder="Nombre del Deporte"
-            value={nuevoDeporte.nombre}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-          <textarea
-            name="descripcion"
-            placeholder="Descripción del Deporte"
-            value={nuevoDeporte.descripcion}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-          <input
-            type="text"
-            name="imagen"
-            placeholder="URL de la Imagen"
-            value={nuevoDeporte.imagen}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-          />
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-            {editing ? "Actualizar Deporte" : "Crear Deporte"}
-          </button>
-        </form>
+        <button
+          onClick={() => setShowFormPopup(true)}
+          className="bg-blue-500 text-white p-2 rounded mb-4"
+        >
+          {editing ? "Editar Deporte" : "Agregar Deporte"}
+        </button>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {deportes.map((deporte) => (
-          <div key={deporte._id} className="max-w-sm mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+          <div
+            key={deporte._id}
+            className="max-w-sm mx-auto bg-white shadow-md rounded-lg overflow-hidden"
+          >
             {deporte.imagen && (
-              <img src={deporte.imagen} alt={deporte.nombre} className="w-full h-40 object-cover" />
+              <img
+                src={deporte.imagen}
+                alt={deporte.nombre}
+                className="w-full h-40 object-cover"
+              />
             )}
             <div className="p-4">
               <h3 className="text-2xl font-semibold mb-2">{deporte.nombre}</h3>
@@ -172,16 +174,77 @@ function Deportes() {
         ))}
       </div>
 
+      {/* Popup para agregar o editar deporte */}
+      {showFormPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">
+              {editing ? "Editar Deporte" : "Agregar Deporte"}
+            </h3>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="nombre"
+                placeholder="Nombre del Deporte"
+                value={nuevoDeporte.nombre}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+                required
+              />
+              <textarea
+                name="descripcion"
+                placeholder="Descripción del Deporte"
+                value={nuevoDeporte.descripcion}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+                required
+              />
+              <input
+                type="text"
+                name="imagen"
+                placeholder="URL de la Imagen"
+                value={nuevoDeporte.imagen}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+              />
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={closeFormPopup}
+                  type="button"
+                  className="bg-gray-300 text-black px-4 py-2 rounded mr-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  {editing ? "Guardar Cambios" : "Guardar Deporte"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Confirmación de Eliminación */}
       {showConfirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
-            <h3 className="text-lg font-bold mb-4">¿Está seguro que desea eliminar el elemento seleccionado?</h3>
+            <h3 className="text-lg font-bold mb-4">
+              ¿Está seguro que desea eliminar el elemento seleccionado?
+            </h3>
             <div className="flex justify-end space-x-4">
-              <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 Confirmar
               </button>
-              <button onClick={cancelDelete} className="bg-gray-300 text-black px-4 py-2 rounded">
+              <button
+                onClick={cancelDelete}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+              >
                 Cancelar
               </button>
             </div>

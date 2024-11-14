@@ -5,12 +5,12 @@ import axios from "axios";
 
 function Competencias() {
   const [competencias, setCompetencias] = useState([]);
-  const [filteredCompetencias, setFilteredCompetencias] = useState([]); // Competencias filtradas
+  const [filteredCompetencias, setFilteredCompetencias] = useState([]);
   const [deportes, setDeportes] = useState([]);
   const [atletas, setAtletas] = useState([]);
-  const [searchCategory, setSearchCategory] = useState(""); // Búsqueda por categoría
-  const [filterYear, setFilterYear] = useState(""); // Filtro por año
-  const [filterDeporte, setFilterDeporte] = useState(""); // Filtro por deporte
+  const [searchCategory, setSearchCategory] = useState("");
+  const [filterYear, setFilterYear] = useState("");
+  const [filterDeporte, setFilterDeporte] = useState("");
   const [nuevaCompetencia, setNuevaCompetencia] = useState({
     deporte: "",
     categoria: "",
@@ -42,7 +42,7 @@ function Competencias() {
         "http://localhost:5000/api/competencias"
       );
       setCompetencias(response.data);
-      setFilteredCompetencias(response.data); // Inicializar con todas las competencias
+      setFilteredCompetencias(response.data);
     } catch (error) {
       console.error("Error al obtener competencias:", error);
     }
@@ -69,7 +69,6 @@ function Competencias() {
   const filterCompetencias = () => {
     let results = competencias;
 
-    // Filtro de categoría
     if (searchCategory) {
       results = results.filter((competencia) =>
         competencia.categoria
@@ -77,15 +76,11 @@ function Competencias() {
           .includes(searchCategory.toLowerCase())
       );
     }
-
-    // Filtro de año
     if (filterYear) {
       results = results.filter(
         (competencia) => competencia.anio === parseInt(filterYear)
       );
     }
-
-    // Filtro de deporte
     if (filterDeporte) {
       results = results.filter(
         (competencia) => competencia.deporte._id === filterDeporte
@@ -150,7 +145,7 @@ function Competencias() {
       }
       fetchCompetencias();
       resetForm();
-      setShowForm(false); // Ocultar formulario después de enviar
+      setShowForm(false);
     } catch (error) {
       console.error("Error al guardar competencia:", error);
     }
@@ -168,7 +163,7 @@ function Competencias() {
     });
     setEditing(true);
     setEditId(competencia._id);
-    setShowForm(true); // Mostrar formulario para editar
+    setShowForm(true);
   };
 
   const handleDelete = async () => {
@@ -209,22 +204,20 @@ function Competencias() {
     <div className="container mx-auto p-4">
       <h2 className="text-3xl font-bold mb-4">Gestión de Competencias</h2>
 
-      {/* Búsqueda y Filtros */}
       <div className="flex flex-wrap gap-4 mb-4">
         <input
           type="text"
           placeholder="Buscar por categoría"
           value={searchCategory}
           onChange={(e) => setSearchCategory(e.target.value)}
-          className="border p-2 w-full sm:w-1/3 rounded"
+          className="border p-2 rounded w-full sm:w-60"
         />
-
         <select
           value={filterYear}
           onChange={(e) => setFilterYear(e.target.value)}
-          className="border p-2 w-full sm:w-1/3 rounded"
+          className="border p-2 rounded w-full sm:w-60"
         >
-          <option value="">Filtrar por año</option>
+          <option value="">Filtrar por Año: N/A</option>
           {[
             ...new Set(competencias.map((competencia) => competencia.anio)),
           ].map((anio) => (
@@ -233,13 +226,12 @@ function Competencias() {
             </option>
           ))}
         </select>
-
         <select
           value={filterDeporte}
           onChange={(e) => setFilterDeporte(e.target.value)}
-          className="border p-2 w-full sm:w-1/3 rounded"
+          className="border p-2 rounded w-full sm:w-60"
         >
-          <option value="">Filtrar por deporte</option>
+          <option value="">Filtrar por Deporte: N/A</option>
           {deportes.map((deporte) => (
             <option key={deporte._id} value={deporte._id}>
               {deporte.nombre}
@@ -249,159 +241,176 @@ function Competencias() {
       </div>
 
       {isAdmin && (
-        <div className="mb-4">
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              resetForm();
-            }}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-          >
-            {showForm ? "Cerrar formulario" : "Agregar Competencia"}
-          </button>
-        </div>
-      )}
-
-      {/* Formulario para agregar/editar competencias */}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-4 p-4 bg-gray-100 rounded shadow-md"
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition mb-4"
         >
-          <select
-            name="deporte"
-            value={nuevaCompetencia.deporte}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-            required
-          >
-            <option value="">Selecciona un Deporte</option>
-            {deportes.map((deporte) => (
-              <option key={deporte._id} value={deporte._id}>
-                {deporte.nombre}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="text"
-            name="categoria"
-            placeholder="Categoría"
-            value={nuevaCompetencia.categoria}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-
-          <input
-            type="number"
-            name="anio"
-            placeholder="Año"
-            value={nuevaCompetencia.anio}
-            onChange={handleInputChange}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-
-          <h3 className="font-semibold mt-2 mb-2">Participantes:</h3>
-          {nuevaCompetencia.participantes.map((participante, index) => (
-            <div key={index} className="flex gap-2 mb-2">
-              <select
-                value={participante.atleta}
-                onChange={(e) =>
-                  handleParticipantChange(index, "atleta", e.target.value)
-                }
-                className="border p-2 w-full"
-                required
-              >
-                <option value="">Selecciona un Atleta</option>
-                {atletas.map((atleta) => (
-                  <option key={atleta._id} value={atleta._id}>
-                    {atleta.nombre}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Tiempo (ej: 1min 3seg)"
-                value={participante.tiempo}
-                onChange={(e) =>
-                  handleParticipantChange(index, "tiempo", e.target.value)
-                }
-                className="border p-2 w-full"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => removeParticipant(index)}
-                className="bg-red-500 text-white px-2 rounded hover:bg-red-600 transition"
-              >
-                Eliminar
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addParticipant}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
-          >
-            Agregar Participante
-          </button>
-
-          <button
-            type="submit"
-            className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-          >
-            {editing ? "Guardar Cambios" : "Guardar Competencia"}
-          </button>
-        </form>
+          Agregar Competencia
+        </button>
       )}
 
-      {/* Lista de competencias */}
-      <ul className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filteredCompetencias.map((competencia) => (
-          <li key={competencia._id} className="bg-white p-4 rounded shadow-md">
-            <h3 className="text-xl font-semibold">
+          <div key={competencia._id} className="bg-white p-4 rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-1">
               {competencia.deporte.nombre} - {competencia.categoria}
             </h3>
-            <p>Año: {competencia.anio}</p>
-            <h4 className="font-semibold">Primeros Lugares:</h4>
-            <ul className="pl-4 list-disc">
+            <p className="text-sm mb-2">Año: {competencia.anio}</p>
+
+            {/* Primeros lugares */}
+            <h4 className="font-semibold text-sm">Primeros Lugares:</h4>
+            <ul className="pl-4 list-disc mb-2">
               <li>🥇 {competencia.primerLugar?.nombre || "No definido"}</li>
               <li>🥈 {competencia.segundoLugar?.nombre || "No definido"}</li>
               <li>🥉 {competencia.tercerLugar?.nombre || "No definido"}</li>
             </ul>
-            <h4 className="font-semibold">Participantes:</h4>
-            <ul className="list-disc pl-5">
-              {competencia.participantes.map((p, index) => (
-                <li key={index} className="text-gray-700">
-                  {p.atleta.nombre} - {p.tiempo}
+
+            {/* Todos los participantes */}
+            <h4 className="font-semibold text-sm mt-2">
+              Todos los Participantes:
+            </h4>
+            <ul className="pl-4 list-disc">
+              {competencia.participantes.map((participante, index) => (
+                <li key={index}>
+                  {participante.atleta.nombre} - Tiempo: {participante.tiempo}
                 </li>
               ))}
             </ul>
+
             {isAdmin && (
-              <div className="mt-2 space-x-2">
+              <div className="mt-2 flex gap-2">
                 <button
                   onClick={() => handleEdit(competencia)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => confirmDelete(competencia._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                 >
                   Eliminar
                 </button>
               </div>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
-      {/* Modal de Confirmación de Eliminación */}
+      {showForm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
+            <h3 className="text-lg font-bold mb-4">
+              {editing ? "Editar Competencia" : "Agregar Competencia"}
+            </h3>
+            <form onSubmit={handleSubmit}>
+              <select
+                name="deporte"
+                value={nuevaCompetencia.deporte}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+                required
+              >
+                <option value="">Selecciona un Deporte</option>
+                {deportes.map((deporte) => (
+                  <option key={deporte._id} value={deporte._id}>
+                    {deporte.nombre}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="categoria"
+                placeholder="Categoría"
+                value={nuevaCompetencia.categoria}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+                required
+              />
+              <input
+                type="number"
+                name="anio"
+                placeholder="Año"
+                value={nuevaCompetencia.anio}
+                onChange={handleInputChange}
+                className="border p-2 mb-2 w-full"
+                required
+              />
+
+              {/* Contenedor de lista de participantes con desplazamiento */}
+              <div className="max-h-64 overflow-y-auto mb-2">
+                <h4 className="font-semibold mt-2 mb-2">Participantes:</h4>
+                {nuevaCompetencia.participantes.map((participante, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <select
+                      value={participante.atleta}
+                      onChange={(e) =>
+                        handleParticipantChange(index, "atleta", e.target.value)
+                      }
+                      className="border p-2 w-full"
+                      required
+                    >
+                      <option value="">Selecciona un Atleta</option>
+                      {atletas.map((atleta) => (
+                        <option key={atleta._id} value={atleta._id}>
+                          {atleta.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Tiempo (ej: 1min 3seg)"
+                      value={participante.tiempo}
+                      onChange={(e) =>
+                        handleParticipantChange(index, "tiempo", e.target.value)
+                      }
+                      className="border p-2 w-full"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeParticipant(index)}
+                      className="bg-red-500 text-white px-2 rounded hover:bg-red-600"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={addParticipant}
+                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mb-4"
+              >
+                Agregar Participante
+              </button>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowForm(false);
+                  }}
+                  type="button"
+                  className="bg-gray-300 text-black px-4 py-2 rounded mr-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  {editing ? "Guardar Cambios" : "Guardar Competencia"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {showConfirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg">
             <h3 className="text-lg font-bold mb-4">
               ¿Está seguro que desea eliminar el elemento seleccionado?
@@ -409,13 +418,13 @@ function Competencias() {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
               >
                 Confirmar
               </button>
               <button
                 onClick={cancelDelete}
-                className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition"
+                className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
               >
                 Cancelar
               </button>
