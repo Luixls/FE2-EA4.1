@@ -12,6 +12,7 @@ import Competencias from "./pages/Competencias";
 import SeccionAdministrativa from "./pages/SeccionAdministrativa";
 import Registro from "./pages/Registro";
 import Login from "./pages/Login";
+import AtletaDetalle from "./pages/AtletaDetalle";
 
 function App() {
   const [modoNocturno, setModoNocturno] = useState(false);
@@ -34,6 +35,7 @@ function App() {
             <Route path="/" element={<PaginaAnimada><Inicio /></PaginaAnimada>} />
             <Route path="/deportes" element={<PaginaAnimada><Deportes /></PaginaAnimada>} />
             <Route path="/atletas" element={<PaginaAnimada><Atletas /></PaginaAnimada>} />
+            <Route path="/atleta/:id" element={<AtletaDetalle />} /> {/* Página de detalles de un atleta */}
             <Route path="/competencias" element={<PaginaAnimada><Competencias /></PaginaAnimada>} />
             <Route path="/seccion-administrativa" element={<PaginaAnimada><SeccionAdministrativa /></PaginaAnimada>} />
             <Route path="/registro" element={<PaginaAnimada><Registro /></PaginaAnimada>} />

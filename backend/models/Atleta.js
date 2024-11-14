@@ -1,11 +1,18 @@
 // ruta: backend/models/Atleta.js
 const mongoose = require("mongoose");
 
-const atletaSchema = new mongoose.Schema({
+const CompetenciaSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  fecha: { type: Date, required: true },
+  resultado: { type: String, required: true },
+});
+
+const AtletaSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   fechaNacimiento: { type: Date, required: true },
   nacionalidad: { type: String, required: true },
-  genero: { type: String, enum: ["masculino", "femenino"], required: true }, // Campo de género
+  genero: { type: String, required: true },
+  competencias: [CompetenciaSchema], // Array de competencias en las que ha participado
 });
 
-module.exports = mongoose.model("Atleta", atletaSchema);
+module.exports = mongoose.model("Atleta", AtletaSchema);
