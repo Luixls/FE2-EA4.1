@@ -103,7 +103,9 @@ function Atletas() {
   const handleEdit = (atleta) => {
     setNuevoAtleta({
       nombre: atleta.nombre,
-      fechaNacimiento: atleta.fechaNacimiento,
+      fechaNacimiento: new Date(atleta.fechaNacimiento)
+        .toISOString()
+        .split("T")[0], // Convierte a YYYY-MM-DD
       nacionalidad: atleta.nacionalidad,
       genero: atleta.genero,
     });

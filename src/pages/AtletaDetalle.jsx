@@ -1,3 +1,5 @@
+// ruta: src/pages/AtletaDetalle.jsx
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -13,7 +15,9 @@ function AtletaDetalle() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:5000/api/atletas/${id}`);
+        const response = await axios.get(
+          `http://localhost:5000/api/atletas/${id}`
+        );
         if (response.status === 200) {
           setAtleta(response.data);
         } else {
@@ -30,15 +34,22 @@ function AtletaDetalle() {
     fetchAtleta();
   }, [id]);
 
-  if (loading) return <p className="text-center mt-4">Cargando datos del atleta...</p>;
+  if (loading)
+    return <p className="text-center mt-4">Cargando datos del atleta...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
-  if (!atleta) return <p className="text-center">No se encontraron detalles para el atleta especificado.</p>;
+  if (!atleta)
+    return (
+      <p className="text-center">
+        No se encontraron detalles para el atleta especificado.
+      </p>
+    );
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg text-center">
       <h1 className="text-3xl font-bold mb-4">{atleta.nombre}</h1>
       <p>
-        <strong>Fecha de Nacimiento:</strong> {new Date(atleta.fechaNacimiento).toLocaleDateString()}
+        <strong>Fecha de Nacimiento:</strong>{" "}
+        {new Date(atleta.fechaNacimiento).toLocaleDateString()}
       </p>
       <p>
         <strong>Nacionalidad:</strong> {atleta.nacionalidad}
@@ -56,7 +67,8 @@ function AtletaDetalle() {
                 <strong>Nombre:</strong> {comp.nombre}
               </p>
               <p>
-                <strong>Fecha:</strong> {new Date(comp.fecha).toLocaleDateString()}
+                <strong>Fecha:</strong>{" "}
+                {new Date(comp.fecha).toLocaleDateString()}
               </p>
               <p>
                 <strong>Resultado:</strong> {comp.resultado}
