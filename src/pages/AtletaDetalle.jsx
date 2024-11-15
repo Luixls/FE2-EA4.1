@@ -7,45 +7,68 @@ function AtletaDetalle() {
   const { id } = useParams();
   const [atleta, setAtleta] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAtletaDetalle = async () => {
+    const fetchAtleta = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const response = await axios.get(`http://localhost:5000/api/atletas/${id}/detalle`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setAtleta(response.data);
+        if (response.status === 200) {
+          setAtleta(response.data);
+        } else {
+          setError("No se encontró el atleta.");
+        }
       } catch (error) {
-        console.error("Error al obtener detalles del atleta:", error);
-        setError("No se pudo cargar la información del atleta.");
+        console.error("Error al obtener los detalles del atleta:", error);
+        setError("Hubo un problema al obtener los datos del atleta.");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchAtletaDetalle();
+
+    fetchAtleta();
   }, [id]);
 
-  if (error) return <p>{error}</p>;
-  if (!atleta) return <p>Cargando...</p>;
+  if (loading) return <p className="text-center mt-4">Cargando datos del atleta...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (!atleta) return <p className="text-center">No se encontraron detalles para el atleta especificado.</p>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-4">{atleta.nombre}</h2>
-      <p><strong>Fecha de Nacimiento:</strong> {new Date(atleta.fechaNacimiento).toLocaleDateString()}</p>
-      <p><strong>Nacionalidad:</strong> {atleta.nacionalidad}</p>
-      <p><strong>Género:</strong> {atleta.genero}</p>
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg text-center">
+      <h1 className="text-3xl font-bold mb-4">{atleta.nombre}</h1>
+      <p>
+        <strong>Fecha de Nacimiento:</strong> {new Date(atleta.fechaNacimiento).toLocaleDateString()}
+      </p>
+      <p>
+        <strong>Nacionalidad:</strong> {atleta.nacionalidad}
+      </p>
+      <p>
+        <strong>Género:</strong> {atleta.genero}
+      </p>
 
-      <h3 className="text-2xl font-semibold mt-6 mb-2">Competencias</h3>
+      <h2 className="text-2xl font-bold mt-6 mb-4">Competencias</h2>
       {atleta.competencias && atleta.competencias.length > 0 ? (
-        <ul className="list-disc pl-5">
-          {atleta.competencias.map((competencia) => (
-            <li key={competencia._id}>
-              <strong>Deporte:</strong> {competencia.deporte?.nombre || "No especificado"} <br />
-              <strong>Categoría:</strong> {competencia.categoria} <br />
-              <strong>Año:</strong> {competencia.anio}
+        <ul className="text-left space-y-4">
+          {atleta.competencias.map((comp, index) => (
+            <li key={index} className="p-4 bg-gray-100 rounded-md shadow-md">
+              <p>
+                <strong>Deporte:</strong> {comp.deporte.nombre}
+              </p>
+              <p>
+                <strong>Categoría:</strong> {comp.categoria}
+              </p>
+              <p>
+                <strong>Año:</strong> {comp.anio}
+              </p>
             </li>
           ))}
         </ul>
       ) : (
-        <p>Este atleta no ha participado en ninguna competencia.</p>
+        <p>No hay competencias registradas para este atleta.</p>
       )}
     </div>
   );
