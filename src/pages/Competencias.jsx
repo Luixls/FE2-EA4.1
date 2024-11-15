@@ -359,7 +359,7 @@ function Competencias() {
                     </select>
                     <input
                       type="text"
-                      placeholder="Tiempo (ej: 1min 3seg)"
+                      placeholder="Tiempo (ej: 1m 3s)"
                       value={participante.tiempo}
                       onChange={(e) =>
                         handleParticipantChange(index, "tiempo", e.target.value)
