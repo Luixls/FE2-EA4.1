@@ -34,12 +34,11 @@ function Header({ toggleModoNocturno, modoNocturno }) {
     <header className="bg-gray-800 text-white p-4 dark:bg-gray-900">
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-xl font-bold">
-          <Link to="/" onClick={closeMenu}>UVM Torneos</Link>
+          <Link to="/" onClick={closeMenu}>
+            UVM Torneos
+          </Link>
         </h1>
-        <button
-          onClick={toggleMenu}
-          className="text-white focus:outline-none"
-        >
+        <button onClick={toggleMenu} className="text-white focus:outline-none">
           ☰
         </button>
 
@@ -52,14 +51,40 @@ function Header({ toggleModoNocturno, modoNocturno }) {
               transition={{ duration: 0.3 }}
               className="absolute top-16 left-0 w-full bg-gray-800 dark:bg-gray-900 p-4 flex flex-col items-center space-y-4 z-50"
             >
-              <Link to="/" className="hover:underline" onClick={closeMenu}>Inicio</Link>
-              <Link to="/deportes" className="hover:underline" onClick={closeMenu}>Deportes</Link>
-              <Link to="/atletas" className="hover:underline" onClick={closeMenu}>Atletas</Link>
-              <Link to="/competencias" className="hover:underline" onClick={closeMenu}>Competencias</Link>
+              <Link to="/" className="hover:underline" onClick={closeMenu}>
+                Inicio
+              </Link>
+              <Link
+                to="/deportes"
+                className="hover:underline"
+                onClick={closeMenu}
+              >
+                Deportes
+              </Link>
+              <Link
+                to="/atletas"
+                className="hover:underline"
+                onClick={closeMenu}
+              >
+                Atletas
+              </Link>
+              <Link
+                to="/competencias"
+                className="hover:underline"
+                onClick={closeMenu}
+              >
+                Competencias
+              </Link>
 
               {/* Solo mostrar "Sección Administrativa" si el usuario tiene rol admin o mod */}
               {(userRole === "admin" || userRole === "mod") && (
-                <Link to="/seccion-administrativa" className="hover:underline" onClick={closeMenu}>Sección Administrativa</Link>
+                <Link
+                  to="/seccion-administrativa"
+                  className="hover:underline"
+                  onClick={closeMenu}
+                >
+                  Sección Administrativa
+                </Link>
               )}
 
               {isAuthenticated ? (
@@ -71,20 +96,22 @@ function Header({ toggleModoNocturno, modoNocturno }) {
                 </button>
               ) : (
                 <>
-                  <Link to="/registro" className="hover:underline" onClick={closeMenu}>Registro</Link>
-                  <Link to="/login" className="hover:underline" onClick={closeMenu}>Iniciar Sesión</Link>
+                  <Link
+                    to="/registro"
+                    className="hover:underline"
+                    onClick={closeMenu}
+                  >
+                    Registro
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="hover:underline"
+                    onClick={closeMenu}
+                  >
+                    Iniciar Sesión
+                  </Link>
                 </>
               )}
-
-              <button
-                onClick={() => {
-                  toggleModoNocturno();
-                  closeMenu();
-                }}
-                className="w-28 h-8 border border-gray-300 rounded text-sm text-center hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                {modoNocturno ? "Modo Claro" : "Modo Nocturno"}
-              </button>
             </motion.nav>
           )}
         </AnimatePresence>
