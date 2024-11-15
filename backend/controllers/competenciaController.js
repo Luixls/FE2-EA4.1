@@ -1,6 +1,7 @@
 // ruta: backend/controllers/competenciaController.js
 
 const Competencia = require("../models/Competencia");
+const Atleta = require("../models/Atleta");
 
 function convertirATiempoEnSegundos(tiempo) {
   const regex = /(\d+h)?\s*(\d+m)?\s*(\d+s)?/;
@@ -26,12 +27,13 @@ function obtenerLugares(participantes) {
   };
 }
 
+// Crear una nueva competencia y actualizar los perfiles de los atletas participantes
 exports.crearCompetencia = async (req, res) => {
   const { deporte, categoria, anio, participantes } = req.body;
   try {
-    const { primerLugar, segundoLugar, tercerLugar } =
-      obtenerLugares(participantes);
+    const { primerLugar, segundoLugar, tercerLugar } = obtenerLugares(participantes);
 
+    // Crear la competencia
     const nuevaCompetencia = new Competencia({
       deporte,
       categoria,
@@ -42,18 +44,31 @@ exports.crearCompetencia = async (req, res) => {
       tercerLugar,
     });
     await nuevaCompetencia.save();
+
+    // Actualizar cada atleta participante de manera individual
+    for (const participante of participantes) {
+      try {
+        await Atleta.findByIdAndUpdate(participante.atleta, {
+          $push: { competencias: nuevaCompetencia._id },
+        });
+      } catch (error) {
+        console.error(`Error al actualizar el atleta ${participante.atleta}:`, error.message);
+      }
+    }
+
     res.status(201).json(nuevaCompetencia);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al crear competencia" });
+    console.error("Error al crear competencia:", error);
+    res.status(500).json({ mensaje: "Error al crear competencia", error: error.message });
   }
 };
 
+// Editar una competencia y actualizar los lugares en base a los tiempos
 exports.editarCompetencia = async (req, res) => {
   const { id } = req.params;
   const { deporte, categoria, anio, participantes } = req.body;
   try {
-    const { primerLugar, segundoLugar, tercerLugar } =
-      obtenerLugares(participantes);
+    const { primerLugar, segundoLugar, tercerLugar } = obtenerLugares(participantes);
 
     const competenciaActualizada = await Competencia.findByIdAndUpdate(
       id,
@@ -74,6 +89,7 @@ exports.editarCompetencia = async (req, res) => {
   }
 };
 
+// Obtener todas las competencias con los atletas participantes y sus lugares
 exports.obtenerCompetencias = async (req, res) => {
   try {
     const competencias = await Competencia.find()
@@ -81,13 +97,14 @@ exports.obtenerCompetencias = async (req, res) => {
       .populate("participantes.atleta", "nombre")
       .populate("primerLugar", "nombre")
       .populate("segundoLugar", "nombre")
-      .populate("tercerLugar", "nombre"); // Agregar el populate aquí
+      .populate("tercerLugar", "nombre");
     res.json(competencias);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener competencias" });
   }
 };
 
+// Eliminar una competencia
 exports.eliminarCompetencia = async (req, res) => {
   const { id } = req.params;
   try {

@@ -6,6 +6,7 @@ const {
   editarAtleta,
   eliminarAtleta,
   obtenerAtleta,
+  obtenerAtletaDetalle,
 } = require("../controllers/atletaController");
 const autenticarToken = require("../middleware/authMiddleware");
 const verificarAdmin = require("../middleware/verificarAdmin");
@@ -16,7 +17,7 @@ const router = express.Router();
 // Obtener todos los atletas (disponible para todos los usuarios autenticados)
 router.get("/", obtenerAtletas);
 
-router.get("/:id", obtenerAtleta);
+router.get('/:id/detalle', obtenerAtletaDetalle);
 
 // Agregar un atleta (solo para admin)
 router.post("/", autenticarToken, verificarAdmin, agregarAtleta);

@@ -70,3 +70,24 @@ exports.eliminarAtleta = async (req, res) => {
     res.status(500).json({ message: "Error al eliminar el atleta" });
   }
 };
+
+// Obtener detalles del atleta con sus competencias
+exports.obtenerAtletaDetalle = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const atleta = await Atleta.findById(id)
+      .populate({
+        path: 'competencias',
+        populate: {
+          path: 'deporte',
+          select: 'nombre'
+        }
+      });
+
+    if (!atleta) return res.status(404).json({ mensaje: "Atleta no encontrado" });
+    res.json(atleta);
+  } catch (error) {
+    console.error("Error al obtener detalle del atleta:", error);
+    res.status(500).json({ mensaje: "Error al obtener el detalle del atleta" });
+  }
+};

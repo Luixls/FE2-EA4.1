@@ -295,12 +295,13 @@ function Atletas() {
             <p className="text-lg mb-1">Género: {atleta.genero}</p>
 
             <div className="mt-4 flex justify-center gap-3">
-              <button
-                onClick={() => navigate(`/atleta/${atleta._id}`)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-base"
-              >
-                Ver Detalles
-              </button>
+            <button
+                    onClick={() => navigate(`/atletas/${atleta._id}/detalle`)}
+                     className="bg-blue-500 text-white px-4 py-2 rounded-lg text-base"
+>
+               Ver Detalles
+            </button>
+
               {(isAdmin || isMod) && (
                 <button
                   onClick={() => handleEdit(atleta)}

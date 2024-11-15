@@ -11,7 +11,7 @@ const verificarAdmin = require("../middleware/verificarAdmin");
 const router = express.Router();
 
 router.get("/", obtenerCompetencias);
-router.post("/", verificarAdmin, crearCompetencia);
+router.post("/", verificarAdmin, crearCompetencia); // Ruta protegida
 router.put("/:id", verificarAdmin, editarCompetencia);
 router.delete("/:id", verificarAdmin, eliminarCompetencia);
 
