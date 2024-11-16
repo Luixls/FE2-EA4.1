@@ -1,7 +1,7 @@
-// ruta: src/pages/AtletaDetalle.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 function AtletaDetalle() {
   const { id } = useParams();
@@ -14,9 +14,14 @@ function AtletaDetalle() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:5000/api/atletas/${id}/detalle`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await axios.get(
+          `http://localhost:5000/api/atletas/${id}/detalle`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         if (response.status === 200) {
           setAtleta(response.data);
         } else {
@@ -33,15 +38,53 @@ function AtletaDetalle() {
     fetchAtleta();
   }, [id]);
 
-  if (loading) return <p className="text-center mt-4">Cargando datos del atleta...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
-  if (!atleta) return <p className="text-center">No se encontraron detalles para el atleta especificado.</p>;
+  if (loading)
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="text-center mt-4"
+      >
+        Cargando datos del atleta...
+      </motion.p>
+    );
+
+  if (error)
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="text-center text-red-500"
+      >
+        {error}
+      </motion.p>
+    );
+
+  if (!atleta)
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="text-center"
+      >
+        No se encontraron detalles para el atleta especificado.
+      </motion.p>
+    );
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg text-center">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg text-center"
+    >
       <h1 className="text-3xl font-bold mb-4">{atleta.nombre}</h1>
       <p>
-        <strong>Fecha de Nacimiento:</strong> {new Date(atleta.fechaNacimiento).toLocaleDateString()}
+        <strong>Fecha de Nacimiento:</strong>{" "}
+        {new Date(atleta.fechaNacimiento).toLocaleDateString()}
       </p>
       <p>
         <strong>Nacionalidad:</strong> {atleta.nacionalidad}
@@ -52,9 +95,20 @@ function AtletaDetalle() {
 
       <h2 className="text-2xl font-bold mt-6 mb-4">Competencias</h2>
       {atleta.competencias && atleta.competencias.length > 0 ? (
-        <ul className="text-left space-y-4">
+        <motion.ul
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="text-left space-y-4"
+        >
           {atleta.competencias.map((comp, index) => (
-            <li key={index} className="p-4 bg-gray-100 rounded-md shadow-md">
+            <motion.li
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="p-4 bg-gray-100 rounded-md shadow-md"
+            >
               <p>
                 <strong>Deporte:</strong> {comp.deporte.nombre}
               </p>
@@ -64,13 +118,19 @@ function AtletaDetalle() {
               <p>
                 <strong>Año:</strong> {comp.anio}
               </p>
-            </li>
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       ) : (
-        <p>No hay competencias registradas para este atleta.</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          No hay competencias registradas para este atleta.
+        </motion.p>
       )}
-    </div>
+    </motion.div>
   );
 }
 
