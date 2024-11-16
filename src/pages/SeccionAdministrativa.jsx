@@ -1,4 +1,6 @@
+// ruta: src/pages/SeccionAdministrativa.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function SeccionAdministrativa() {
@@ -13,15 +15,21 @@ function SeccionAdministrativa() {
   const [sistemaPassword, setSistemaPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [showFormPopup, setShowFormPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
 
   const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("rol");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUsuarios();
-  }, []);
+    if (!token || (userRole !== "admin" && userRole !== "mod")) {
+      navigate("/"); // Redirigir si no tiene permiso
+    } else {
+      fetchUsuarios();
+    }
+  }, [token, userRole, navigate]);
 
   const fetchUsuarios = async () => {
     try {
@@ -48,7 +56,7 @@ function SeccionAdministrativa() {
       return;
     }
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/usuarios",
         { ...nuevoUsuario, sistemaPassword },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -56,6 +64,7 @@ function SeccionAdministrativa() {
       setSuccess("Usuario creado exitosamente.");
       fetchUsuarios();
       resetForm();
+      setShowFormPopup(false);
     } catch (error) {
       setError(error.response?.data?.mensaje || "Error al crear usuario.");
       resetMessages();
@@ -100,7 +109,6 @@ function SeccionAdministrativa() {
       rol: "mod",
     });
     setSistemaPassword("");
-    setShowForm(false);
   };
 
   const resetMessages = () => {
@@ -119,82 +127,14 @@ function SeccionAdministrativa() {
       {error && <p className="text-red-500 text-center">{error}</p>}
       {success && <p className="text-green-500 text-center">{success}</p>}
 
-      <div className="mb-6 text-center">
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          {showForm ? "Ocultar formulario" : "Crear un nuevo usuario"}
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="mb-6">
-          <h3 className="text-xl font-bold mb-4 text-center">
-            Crear Nuevo Usuario
-          </h3>
-          <form onSubmit={handleCrearUsuario} className="space-y-4">
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={nuevoUsuario.username}
-              onChange={handleInputChange}
-              required
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="text"
-              name="nombre"
-              placeholder="Nombre"
-              value={nuevoUsuario.nombre}
-              onChange={handleInputChange}
-              required
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={nuevoUsuario.email}
-              onChange={handleInputChange}
-              required
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={nuevoUsuario.password}
-              onChange={handleInputChange}
-              required
-              className="border p-2 rounded w-full"
-            />
-            <select
-              name="rol"
-              value={nuevoUsuario.rol}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-            >
-              <option value="mod">Moderador</option>
-              <option value="admin">Administrador</option>
-            </select>
-            <input
-              type="password"
-              placeholder="Contraseña del sistema"
-              value={sistemaPassword}
-              onChange={(e) => setSistemaPassword(e.target.value)}
-              required
-              className="border p-2 rounded w-full"
-            />
-            <button
-              type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded w-full"
-            >
-              Crear Usuario
-            </button>
-          </form>
+      {userRole === "admin" && (
+        <div className="mb-6 text-center">
+          <button
+            onClick={() => setShowFormPopup(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Crear un nuevo usuario
+          </button>
         </div>
       )}
 
@@ -218,17 +158,100 @@ function SeccionAdministrativa() {
               <p>
                 <strong>Rol:</strong> {usuario.rol}
               </p>
-              <button
-                onClick={() => confirmEliminarUsuario(usuario._id)}
-                className="bg-red-500 text-white px-4 py-2 rounded mt-2"
-              >
-                Eliminar
-              </button>
+              {userRole === "admin" && (
+                <button
+                  onClick={() => confirmEliminarUsuario(usuario._id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded mt-2"
+                >
+                  Eliminar
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </div>
 
+      {/* Popup para crear usuario */}
+      {showFormPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">Crear Nuevo Usuario</h3>
+            <form onSubmit={handleCrearUsuario}>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={nuevoUsuario.username}
+                onChange={handleInputChange}
+                required
+                className="border p-2 rounded w-full mb-4"
+              />
+              <input
+                type="text"
+                name="nombre"
+                placeholder="Nombre"
+                value={nuevoUsuario.nombre}
+                onChange={handleInputChange}
+                required
+                className="border p-2 rounded w-full mb-4"
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={nuevoUsuario.email}
+                onChange={handleInputChange}
+                required
+                className="border p-2 rounded w-full mb-4"
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={nuevoUsuario.password}
+                onChange={handleInputChange}
+                required
+                className="border p-2 rounded w-full mb-4"
+              />
+              <select
+                name="rol"
+                value={nuevoUsuario.rol}
+                onChange={handleInputChange}
+                required
+                className="border p-2 rounded w-full mb-4"
+              >
+                <option value="mod">Moderador</option>
+                <option value="admin">Administrador</option>
+              </select>
+              <input
+                type="password"
+                placeholder="Contraseña del sistema"
+                value={sistemaPassword}
+                onChange={(e) => setSistemaPassword(e.target.value)}
+                required
+                className="border p-2 rounded w-full mb-4"
+              />
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowFormPopup(false)}
+                  className="bg-gray-300 text-black px-4 py-2 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Crear Usuario
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Popup para eliminar usuario */}
       {showDeletePopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">

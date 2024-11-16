@@ -25,6 +25,7 @@ function Competencias() {
 
   const token = localStorage.getItem("token");
   const isAdmin = localStorage.getItem("rol") === "admin";
+  const isMod = localStorage.getItem("rol") === "mod";
 
   useEffect(() => {
     fetchCompetencias();
@@ -277,22 +278,24 @@ function Competencias() {
               ))}
             </ul>
 
-            {isAdmin && (
-              <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex gap-2">
+              {(isAdmin || isMod) && (
                 <button
                   onClick={() => handleEdit(competencia)}
                   className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
                 >
                   Editar
                 </button>
+              )}
+              {isAdmin && (
                 <button
                   onClick={() => confirmDelete(competencia._id)}
                   className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                 >
                   Eliminar
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </div>

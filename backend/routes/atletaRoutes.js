@@ -14,7 +14,6 @@ const verificarMod = require("../middleware/verificarMod");
 
 const router = express.Router();
 
-// Obtener todos los atletas (disponible para todos los usuarios autenticados)
 router.get("/", obtenerAtletas);
 
 router.get('/:id/detalle', obtenerAtletaDetalle);
