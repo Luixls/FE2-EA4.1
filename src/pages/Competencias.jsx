@@ -13,9 +13,8 @@ function Competencias() {
   const [filterDeporte, setFilterDeporte] = useState("");
   const [nuevaCompetencia, setNuevaCompetencia] = useState({
     deporte: "",
-    categoria: "",
     anio: "",
-    participantes: [{ atleta: "", tiempo: "" }],
+    categorias: [{ nombre: "", participantes: [{ atleta: "", tiempo: "" }] }],
   });
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -39,13 +38,11 @@ function Competencias() {
 
   const fetchCompetencias = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/competencias"
-      );
+      const response = await axios.get("http://localhost:5000/api/competencias");
       setCompetencias(response.data);
       setFilteredCompetencias(response.data);
     } catch (error) {
-      console.error("Error al obtener competencias:", error);
+      console.error("Error al obtener competencias:", error.response?.data || error.message);
     }
   };
 
@@ -66,26 +63,21 @@ function Competencias() {
       console.error("Error al obtener atletas:", error);
     }
   };
-
   const filterCompetencias = () => {
     let results = competencias;
 
     if (searchCategory) {
       results = results.filter((competencia) =>
-        competencia.categoria
-          .toLowerCase()
-          .includes(searchCategory.toLowerCase())
+        competencia.categorias.some((cat) =>
+          cat.nombre.toLowerCase().includes(searchCategory.toLowerCase())
+        )
       );
     }
     if (filterYear) {
-      results = results.filter(
-        (competencia) => competencia.anio === parseInt(filterYear)
-      );
+      results = results.filter((competencia) => competencia.anio === parseInt(filterYear));
     }
     if (filterDeporte) {
-      results = results.filter(
-        (competencia) => competencia.deporte._id === filterDeporte
-      );
+      results = results.filter((competencia) => competencia.deporte._id === filterDeporte);
     }
 
     setFilteredCompetencias(results);
@@ -96,34 +88,47 @@ function Competencias() {
     setNuevaCompetencia({ ...nuevaCompetencia, [name]: value });
   };
 
-  const handleParticipantChange = (index, field, value) => {
-    const updatedParticipantes = [...nuevaCompetencia.participantes];
-    updatedParticipantes[index][field] = value;
-    setNuevaCompetencia({
-      ...nuevaCompetencia,
-      participantes: updatedParticipantes,
-    });
+  const handleCategoryChange = (index, field, value) => {
+    const updatedCategorias = [...nuevaCompetencia.categorias];
+    updatedCategorias[index][field] = value;
+    setNuevaCompetencia({ ...nuevaCompetencia, categorias: updatedCategorias });
   };
 
-  const addParticipant = () => {
+  const handleParticipantChange = (catIndex, partIndex, field, value) => {
+    const updatedCategorias = [...nuevaCompetencia.categorias];
+    const updatedParticipantes = [...updatedCategorias[catIndex].participantes];
+    updatedParticipantes[partIndex][field] = value;
+    updatedCategorias[catIndex].participantes = updatedParticipantes;
+    setNuevaCompetencia({ ...nuevaCompetencia, categorias: updatedCategorias });
+  };
+
+  const addCategory = () => {
     setNuevaCompetencia({
       ...nuevaCompetencia,
-      participantes: [
-        ...nuevaCompetencia.participantes,
-        { atleta: "", tiempo: "" },
+      categorias: [
+        ...nuevaCompetencia.categorias,
+        { nombre: "", participantes: [{ atleta: "", tiempo: "" }] },
       ],
     });
   };
 
-  const removeParticipant = (index) => {
-    const updatedParticipantes = [...nuevaCompetencia.participantes];
-    updatedParticipantes.splice(index, 1);
-    setNuevaCompetencia({
-      ...nuevaCompetencia,
-      participantes: updatedParticipantes,
-    });
+  const addParticipant = (index) => {
+    const updatedCategorias = [...nuevaCompetencia.categorias];
+    updatedCategorias[index].participantes.push({ atleta: "", tiempo: "" });
+    setNuevaCompetencia({ ...nuevaCompetencia, categorias: updatedCategorias });
   };
 
+  const removeCategory = (index) => {
+    const updatedCategorias = [...nuevaCompetencia.categorias];
+    updatedCategorias.splice(index, 1);
+    setNuevaCompetencia({ ...nuevaCompetencia, categorias: updatedCategorias });
+  };
+
+  const removeParticipant = (catIndex, partIndex) => {
+    const updatedCategorias = [...nuevaCompetencia.categorias];
+    updatedCategorias[catIndex].participantes.splice(partIndex, 1);
+    setNuevaCompetencia({ ...nuevaCompetencia, categorias: updatedCategorias });
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -148,18 +153,20 @@ function Competencias() {
       resetForm();
       setShowForm(false);
     } catch (error) {
-      console.error("Error al guardar competencia:", error);
+      console.error("Error al guardar competencia:", error.response?.data || error.message);
     }
   };
 
   const handleEdit = (competencia) => {
     setNuevaCompetencia({
       deporte: competencia.deporte._id,
-      categoria: competencia.categoria,
       anio: competencia.anio,
-      participantes: competencia.participantes.map((p) => ({
-        atleta: p.atleta._id,
-        tiempo: p.tiempo,
+      categorias: competencia.categorias.map((cat) => ({
+        nombre: cat.nombre,
+        participantes: cat.participantes.map((p) => ({
+          atleta: p.atleta._id,
+          tiempo: p.tiempo,
+        })),
       })),
     });
     setEditing(true);
@@ -176,7 +183,7 @@ function Competencias() {
       setShowConfirmDelete(false);
       setDeleteId(null);
     } catch (error) {
-      console.error("Error al eliminar competencia:", error);
+      console.error("Error al eliminar competencia:", error.response?.data || error.message);
     }
   };
 
@@ -193,22 +200,21 @@ function Competencias() {
   const resetForm = () => {
     setNuevaCompetencia({
       deporte: "",
-      categoria: "",
       anio: "",
-      participantes: [{ atleta: "", tiempo: "" }],
+      categorias: [{ nombre: "", participantes: [{ atleta: "", tiempo: "" }] }],
     });
     setEditing(false);
     setEditId(null);
   };
-
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-4">Gestión de Competencias</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center">Gestión de Competencias</h2>
 
-      <div className="flex flex-wrap gap-4 mb-4">
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-4 mb-4 justify-center">
         <input
           type="text"
-          placeholder="Buscar por categoría"
+          placeholder="Buscar por Categoría"
           value={searchCategory}
           onChange={(e) => setSearchCategory(e.target.value)}
           className="border p-2 rounded w-full sm:w-60"
@@ -218,21 +224,21 @@ function Competencias() {
           onChange={(e) => setFilterYear(e.target.value)}
           className="border p-2 rounded w-full sm:w-60"
         >
-          <option value="">Filtrar por Año: N/A</option>
-          {[
-            ...new Set(competencias.map((competencia) => competencia.anio)),
-          ].map((anio) => (
-            <option key={anio} value={anio}>
-              {anio}
-            </option>
-          ))}
+          <option value="">Filtrar por Año</option>
+          {[...new Set(competencias.map((competencia) => competencia.anio))].map(
+            (anio) => (
+              <option key={anio} value={anio}>
+                {anio}
+              </option>
+            )
+          )}
         </select>
         <select
           value={filterDeporte}
           onChange={(e) => setFilterDeporte(e.target.value)}
           className="border p-2 rounded w-full sm:w-60"
         >
-          <option value="">Filtrar por Deporte: N/A</option>
+          <option value="">Filtrar por Deporte</option>
           {deportes.map((deporte) => (
             <option key={deporte._id} value={deporte._id}>
               {deporte.nombre}
@@ -241,6 +247,7 @@ function Competencias() {
         </select>
       </div>
 
+      {/* Botón para agregar competencia */}
       {isAdmin && (
         <button
           onClick={() => setShowForm(true)}
@@ -250,33 +257,44 @@ function Competencias() {
         </button>
       )}
 
+      {/* Lista de competencias */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filteredCompetencias.map((competencia) => (
           <div key={competencia._id} className="bg-white p-4 rounded shadow-md">
             <h3 className="text-lg font-semibold mb-1">
-              {competencia.deporte.nombre} - {competencia.categoria}
+                 {competencia.deporte?.nombre || "Deporte no definido"} - 
+                 {competencia.categorias?.map((cat) => cat.nombre).join(", ") || "Sin categorías"}
             </h3>
-            <p className="text-sm mb-2">Año: {competencia.anio}</p>
 
-            {/* Primeros lugares */}
-            <h4 className="font-semibold text-sm">Primeros Lugares:</h4>
-            <ul className="pl-4 list-disc mb-2">
-              <li>🥇 {competencia.primerLugar?.nombre || "No definido"}</li>
-              <li>🥈 {competencia.segundoLugar?.nombre || "No definido"}</li>
-              <li>🥉 {competencia.tercerLugar?.nombre || "No definido"}</li>
-            </ul>
-
-            {/* Todos los participantes */}
-            <h4 className="font-semibold text-sm mt-2">
-              Todos los Participantes:
-            </h4>
-            <ul className="pl-4 list-disc">
-              {competencia.participantes.map((participante, index) => (
-                <li key={index}>
-                  {participante.atleta.nombre} - Tiempo: {participante.tiempo}
-                </li>
-              ))}
-            </ul>
+            {competencia.categorias?.map((categoria, index) => (
+  <div key={index} className="mt-2">
+    <h4 className="font-semibold">
+      {categoria?.nombre || "Categoría no definida"}
+    </h4>
+    <ul className="list-disc pl-4">
+      {categoria.participantes?.map((participante, pIndex) => (
+        <li key={pIndex}>
+          {participante?.atleta?.nombre || "Atleta no definido"} - 
+          Tiempo: {participante?.tiempo || "No especificado"}
+        </li>
+      ))}
+    </ul>
+    <div className="mt-2">
+      <p>
+        <strong>🥇 Primer Lugar:</strong>{" "}
+        {categoria?.primerLugar?.nombre || "No definido"}
+      </p>
+      <p>
+        <strong>🥈 Segundo Lugar:</strong>{" "}
+        {categoria?.segundoLugar?.nombre || "No definido"}
+      </p>
+      <p>
+        <strong>🥉 Tercer Lugar:</strong>{" "}
+        {categoria?.tercerLugar?.nombre || "No definido"}
+      </p>
+    </div>
+  </div>
+))}
 
             <div className="mt-2 flex gap-2">
               {(isAdmin || isMod) && (
@@ -299,10 +317,10 @@ function Competencias() {
           </div>
         ))}
       </div>
-
+      {/* Modal para agregar o editar competencia */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-3xl">
             <h3 className="text-lg font-bold mb-4">
               {editing ? "Editar Competencia" : "Agregar Competencia"}
             </h3>
@@ -322,80 +340,93 @@ function Competencias() {
                 ))}
               </select>
               <input
-                type="text"
-                name="categoria"
-                placeholder="Categoría"
-                value={nuevaCompetencia.categoria}
-                onChange={handleInputChange}
-                className="border p-2 mb-2 w-full"
-                required
-              />
-              <input
                 type="number"
                 name="anio"
                 placeholder="Año"
                 value={nuevaCompetencia.anio}
                 onChange={handleInputChange}
-                className="border p-2 mb-2 w-full"
+                className="border p-2 mb-4 w-full"
                 required
               />
 
-              {/* Contenedor de lista de participantes con desplazamiento */}
-              <div className="max-h-64 overflow-y-auto mb-2">
-                <h4 className="font-semibold mt-2 mb-2">Participantes:</h4>
-                {nuevaCompetencia.participantes.map((participante, index) => (
-                  <div key={index} className="flex gap-2 mb-2">
-                    <select
-                      value={participante.atleta}
-                      onChange={(e) =>
-                        handleParticipantChange(index, "atleta", e.target.value)
-                      }
-                      className="border p-2 w-full"
-                      required
-                    >
-                      <option value="">Selecciona un Atleta</option>
-                      {atletas.map((atleta) => (
-                        <option key={atleta._id} value={atleta._id}>
-                          {atleta.nombre}
-                        </option>
-                      ))}
-                    </select>
+              {/* Categorías */}
+              <div>
+                <h4 className="font-bold mb-2">Categorías:</h4>
+                {nuevaCompetencia.categorias.map((categoria, index) => (
+                  <div key={index} className="mb-4">
                     <input
                       type="text"
-                      placeholder="Tiempo (ej: 1h 33m 55s)"
-                      value={participante.tiempo}
+                      placeholder="Nombre de la Categoría"
+                      value={categoria.nombre}
                       onChange={(e) =>
-                        handleParticipantChange(index, "tiempo", e.target.value)
+                        handleCategoryChange(index, "nombre", e.target.value)
                       }
-                      className="border p-2 w-full"
+                      className="border p-2 mb-2 w-full"
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => removeParticipant(index)}
-                      className="bg-red-500 text-white px-2 rounded hover:bg-red-600"
-                    >
-                      Eliminar
-                    </button>
+                    <div>
+                      {categoria.participantes.map((participante, pIndex) => (
+                        <div key={pIndex} className="flex gap-2 mb-2">
+                          <select
+                            value={participante.atleta}
+                            onChange={(e) =>
+                              handleParticipantChange(index, pIndex, "atleta", e.target.value)
+                            }
+                            className="border p-2 w-full"
+                            required
+                          >
+                            <option value="">Selecciona un Atleta</option>
+                            {atletas.map((atleta) => (
+                              <option key={atleta._id} value={atleta._id}>
+                                {atleta.nombre}
+                              </option>
+                            ))}
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Tiempo (ej. 1h 30m)"
+                            value={participante.tiempo}
+                            onChange={(e) =>
+                              handleParticipantChange(index, pIndex, "tiempo", e.target.value)
+                            }
+                            className="border p-2 w-full"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeParticipant(index, pIndex)}
+                            className="bg-red-500 text-white px-2 rounded hover:bg-red-600"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addParticipant(index)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mb-4"
+                      >
+                        Agregar Participante
+                      </button>
+                    </div>
                   </div>
                 ))}
+                <button
+                  type="button"
+                  onClick={addCategory}
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                  Agregar Categoría
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={addParticipant}
-                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 mb-4"
-              >
-                Agregar Participante
-              </button>
 
               <div className="flex justify-end mt-4">
                 <button
+                  type="button"
                   onClick={() => {
                     resetForm();
                     setShowForm(false);
                   }}
-                  type="button"
                   className="bg-gray-300 text-black px-4 py-2 rounded mr-2"
                 >
                   Cancelar
@@ -412,13 +443,14 @@ function Competencias() {
         </div>
       )}
 
+      {/* Confirmación de eliminación */}
       {showConfirmDelete && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-lg">
             <h3 className="text-lg font-bold mb-4">
-              ¿Está seguro que desea eliminar el elemento seleccionado?
+              ¿Está seguro que desea eliminar esta competencia?
             </h3>
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end gap-4">
               <button
                 onClick={handleDelete}
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
